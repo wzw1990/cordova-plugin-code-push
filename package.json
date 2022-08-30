@@ -47,6 +47,12 @@
     "replace": "^1.2.0",
     "run-sequence": "^2.2.1",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.5.3",
+    "cordova-plugin-device": "^2.1.0",
+    "cordova-plugin-dialogs": "^2.0.2",
+    "cordova-plugin-file": "^7.0.0",
+    "cordova-plugin-zip": "^3.1.0"
+  },
+  "dependencies": {
   }
 }
