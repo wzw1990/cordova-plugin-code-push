@@ -7,3 +7,5 @@ bin/test/*
 
 #ignore the test output files
 test-*
+
+.idea

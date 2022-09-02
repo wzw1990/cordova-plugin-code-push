@@ -1,6 +1,7 @@
 package com.microsoft.cordova;
 
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Base64;
 
@@ -14,21 +15,18 @@ import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.file.FileUtils;
 import org.json.JSONException;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Date;
 import java.util.Map;
@@ -373,7 +371,7 @@ public class CodePush extends CordovaPlugin {
     }
 
     private void markUpdate() {
-    /* this flag will clear when reloading the plugin */
+        /* this flag will clear when reloading the plugin */
         this.didUpdate = true;
         this.codePushPackageManager.markInstallNeedsConfirmation();
     }
@@ -438,7 +436,7 @@ public class CodePush extends CordovaPlugin {
     }
 
     private boolean execPreInstall(CordovaArgs args, CallbackContext callbackContext) {
-    /* check if package is valid */
+        /* check if package is valid */
         try {
             final String startLocation = args.getString(0);
             File startPage = this.getStartPageForPackage(startLocation);
@@ -520,8 +518,13 @@ public class CodePush extends CordovaPlugin {
 
     private void navigateToFile(File startPageFile) throws MalformedURLException {
         if (startPageFile != null) {
-            String url = startPageFile.toURI().toURL().toString();
-            this.navigateToURL(url);
+            if (this.isEnableInsecureFileMode()) {
+                String url = startPageFile.toURI().toURL().toString();
+                this.navigateToURL(url);
+            } else {
+                String url = FileUtils.getFilePlugin().resolveNativeUri(Uri.fromFile(startPageFile)).toString();
+                this.navigateToURL(url);
+            }
         }
     }
 
@@ -544,9 +547,16 @@ public class CodePush extends CordovaPlugin {
 
     private File getStartPageForPackage(String packageLocation) {
         if (packageLocation != null) {
-            File startPage = new File(this.cordova.getActivity().getFilesDir() + packageLocation, "www/" + getConfigStartPageName());
-            if (startPage.exists()) {
-                return startPage;
+            if (this.isEnableInsecureFileMode()) {
+                File startPage = new File(this.cordova.getActivity().getFilesDir() + packageLocation, "www/" + getConfigStartPageName());
+                if (startPage.exists()) {
+                    return startPage;
+                }
+            } else {
+                File startPage = new File(FileUtils.getFilePlugin().remapUri(Uri.parse(packageLocation)).getPath());
+                if (startPage.exists()) {
+                    return startPage;
+                }
             }
         }
 
@@ -577,6 +587,10 @@ public class CodePush extends CordovaPlugin {
         ConfigXmlParser parser = new ConfigXmlParser();
         parser.parse(this.cordova.getActivity());
         return parser.getLaunchUrl();
+    }
+
+    private Boolean isEnableInsecureFileMode() {
+        return this.webView.getPreferences().getBoolean("AndroidInsecureFileModeEnabled", false);
     }
 
     /**
