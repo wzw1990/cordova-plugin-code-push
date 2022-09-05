@@ -4,6 +4,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Base64;
+import android.util.Log;
 
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -14,7 +15,9 @@ import org.apache.cordova.ConfigXmlParser;
 import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaPreferences;
 import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.LOG;
 import org.apache.cordova.file.FileUtils;
 import org.json.JSONException;
 
@@ -547,16 +550,9 @@ public class CodePush extends CordovaPlugin {
 
     private File getStartPageForPackage(String packageLocation) {
         if (packageLocation != null) {
-            if (this.isEnableInsecureFileMode()) {
-                File startPage = new File(this.cordova.getActivity().getFilesDir() + packageLocation, "www/" + getConfigStartPageName());
-                if (startPage.exists()) {
-                    return startPage;
-                }
-            } else {
-                File startPage = new File(FileUtils.getFilePlugin().remapUri(Uri.parse(packageLocation)).getPath());
-                if (startPage.exists()) {
-                    return startPage;
-                }
+            File startPage = new File(this.cordova.getActivity().getFilesDir() + packageLocation, "www/" + getConfigStartPageName());
+            if (startPage.exists()) {
+                return startPage;
             }
         }
 
@@ -576,8 +572,8 @@ public class CodePush extends CordovaPlugin {
     private String getConfigStartPageName() {
         String launchUrl = this.getConfigLaunchUrl();
         int launchUrlLength = launchUrl.length();
-        if (launchUrl.startsWith(CodePush.WWW_ASSET_PATH_PREFIX)) {
-            launchUrl = launchUrl.substring(CodePush.WWW_ASSET_PATH_PREFIX.length(), launchUrlLength);
+        if (launchUrl.startsWith(this.getLaunchUrlPrefix())) {
+            launchUrl = launchUrl.substring(this.getLaunchUrlPrefix().length(), launchUrlLength);
         }
 
         return launchUrl;
@@ -591,6 +587,18 @@ public class CodePush extends CordovaPlugin {
 
     private Boolean isEnableInsecureFileMode() {
         return this.webView.getPreferences().getBoolean("AndroidInsecureFileModeEnabled", false);
+    }
+
+    private String getLaunchUrlPrefix() {
+        CordovaPreferences prefs = this.webView.getPreferences();
+        if (this.isEnableInsecureFileMode()) {
+            return this.WWW_ASSET_PATH_PREFIX;
+        } else {
+            String scheme = prefs.getString("scheme", "https").toLowerCase();
+            String hostname = prefs.getString("hostname", "localhost");
+
+            return scheme + "://" + hostname + '/';
+        }
     }
 
     /**
