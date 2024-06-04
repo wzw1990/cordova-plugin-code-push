@@ -102,6 +102,9 @@ var FileUtil = (function () {
         if (ignoreList.indexOf("__MACOSX") === -1) {
             ignoreList.push("__MACOSX");
         }
+        if (ignoreList.indexOf(".codepushrelease") === -1) {
+            ignoreList.push(".codepushrelease");
+        }
         var fail = function (error) {
             callback(FileUtil.fileErrorToError(error), null);
         };

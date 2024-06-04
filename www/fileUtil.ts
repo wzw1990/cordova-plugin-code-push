@@ -125,6 +125,9 @@ class FileUtil {
         if (ignoreList.indexOf("__MACOSX") === -1){
             ignoreList.push("__MACOSX");
         }
+        if (ignoreList.indexOf(".codepushrelease") === -1) {
+            ignoreList.push(".codepushrelease");
+        }
 
         var fail = (error: FileError) => {
             callback(FileUtil.fileErrorToError(error), null);
