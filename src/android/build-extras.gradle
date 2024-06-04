@@ -19,7 +19,7 @@
        specific language governing permissions and limitations
        under the License.
  */
-ext.postBuildExtras = {
+cdvPluginPostBuildExtras.add = {
     
     def inAssetsDir = file("src/main/assets")
     if (!inAssetsDir.exists()) { // Add support for cordova-android < 7.0.0
