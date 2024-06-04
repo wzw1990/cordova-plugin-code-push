@@ -76,16 +76,7 @@ var RemotePackage = (function (_super) {
                 };
                 var filedir = cordova.file.dataDirectory + LocalPackage.DownloadDir + "/";
                 var filename = LocalPackage.PackageUpdateFileName;
-                const download = () => {
-                    cordova.plugin.http.downloadFile(this.downloadUrl, {}, {}, filedir + filename, onFileReady, onFileError_1);
-                }
-                window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (fileSystem) {
-                    fileSystem.getDirectory("codepush", { create: true, exclusive: false }, function (codepushDir) {
-                        codepushDir.getDirectory("download", { create: true, exclusive: false }, function (downloadDir) {
-                            download();
-                        });
-                    });
-                });
+                cordova.plugin.http.downloadFile(this.downloadUrl, {}, {}, filedir + filename, onFileReady, onFileError_1);
             }
         }
         catch (e) {
