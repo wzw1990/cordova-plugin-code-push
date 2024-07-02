@@ -525,7 +525,7 @@ public class CodePush extends CordovaPlugin {
                 String url = startPageFile.toURI().toURL().toString();
                 this.navigateToURL(url);
             } else {
-                String url = FileUtils.getFilePlugin().resolveNativeUri(Uri.fromFile(startPageFile)).toString();
+                String url = startPageFile.toString();
                 this.navigateToURL(url);
             }
         }
